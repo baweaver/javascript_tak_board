@@ -26,8 +26,48 @@ export default class Board {
     return JSON.parse(JSON.stringify(this.state));
   }
 
-  checkWin () {
+  checkRoadWin (color) {
+    const other = color === 'w' ? 'b' : 'w';
+
+    if (isRoadWin(color)) return [true, color];
+    if (isRoadWin(other)) return [true, other];
+
     return false;
+  }
+
+  flatCounts() {
+    return this.state.reduce(({white, black}, row) => {
+      row.forEach(cell => {
+        const topPiece = last(cell);
+
+        if (topPiece === 'w') white += 1;
+        if (topPiece === 'b') black += 1;
+      });
+
+      return {white, black};
+    }, {white: 0, black: 0});
+  }
+
+  isFull() {
+    return this.state.reduce((a, row) =>
+      a + row.reduce((a2, cell) => a2 + (cell.length ? 1 : 0), 0)
+    , 0) === this.size * this.size;
+  }
+
+  checkFlatWin (color) {
+    const flatCounts = this.flatCounts();
+
+    let winner;
+
+    if (flatCounts.white > flatCounts.black) {
+      winner = 'w';
+    } else if (flatCounts.black > flatCounts.white) {
+      winner = 'b';
+    } else {
+      winner = 't';
+    }
+
+    return [true, winner, flatCounts];
   }
 
   bitBoard (color) {
@@ -97,7 +137,7 @@ export default class Board {
 
     const [newBoard, pieceType] = response;
 
-    return [true, newBoard, pieceType];
+    return [true, newBoard, player.decrement(pieceType)];
   }
 
   maxCell () {

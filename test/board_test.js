@@ -82,4 +82,31 @@ describe('Board', () => {
       expect(board.isRoadWin('w')).to.equal(false);
     });
   });
+
+  describe('#isFull', () => {
+    it('detects when the board is full', () => {
+      const board = new Board(3, [
+        [[ 'w'], [ 'w'], ['Sb']],
+        [[ 'w'], [ 'b'], ['Sb']],
+        [['Cb'], ['Cw'], ['Sb']],
+      ]);
+
+      expect(board.isFull()).to.equal(true);
+    });
+  });
+
+  describe('#flatCounts', () => {
+    it('gets the flat count of the board, ignoring walls and caps', () => {
+      const board = new Board(3, [
+        [[ 'w'], [ 'w'], ['Sb']],
+        [[ 'w'], [ 'b'], ['Sb']],
+        [['Cb'], ['Cw'], [    ]],
+      ]);
+
+      expect(board.flatCounts()).to.include({
+        white: 3,
+        black: 1
+      });
+    });
+  });
 });

@@ -42,7 +42,7 @@ class Game {
   }
 
   undo () {
-    if (this.result) return false;
+    if (this.winningPlayer) return false;
 
     // Get rid of the last historical reference
     this.history.pop();
@@ -56,21 +56,29 @@ class Game {
   }
 
   move(ptnText, player=currentPlayer()) {
-    if (this.result) {
-      return [true, this.result];
+    if (this.winningPlayer) {
+      return [true, this.winningPlayer, this.winType];
     }
 
     const ptn = new Ptn(ptnText);
 
     const [ status, ...response ] = this.board.move(
-      currentPlayer(), ptn, this.turn in [1,2]
+      currentPlayer(), ptn, [1,2].includes(this.turn)
     );
 
     if (!status) return response;
 
     const [ newBoard, newPlayer ] = response;
 
-    const [ win, result ] = newBoard.checkWin();
+    let [ win, winningPlayer, winType ] = newBoard.checkWin();
+
+    if (
+      !win &&
+      (newPlayer.pieces === 0 && newPlayer.capstones === 0) ||
+      newBoard.isFull()
+    ) {
+      [ win, winningPlayer, winType ] = newBoard.checkFlatWin();
+    }
 
     setCurrentPlayer(newPlayer);
 
@@ -79,16 +87,16 @@ class Game {
       board:   newBoard,
       players: [this.whitePlayer, this.blackPlayer],
       ptn,
-      win,
-      result
+      winningPlayer,
+      winType
     });
 
-    this.board  = newBoard;
-    this.win    = win;
-    this.result = result;
+    this.board         = newBoard;
+    this.winType       = winType;
+    this.winningPlayer = winningPlayer;
 
-    if (result) return [true, result];
+    if (win) return [true, winningPlayer, winType];
 
-    this.turn  += 1;
+    this.turn += 1;
   }
 }

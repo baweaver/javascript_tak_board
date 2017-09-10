@@ -2,6 +2,8 @@ import Player from './player';
 import Board from './board';
 import Ptn from './ptn';
 
+const times = size => [...Array(size)];
+
 const tileCounts = [
   [0, 10],
   [0, 15],
